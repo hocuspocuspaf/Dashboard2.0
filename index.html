@@ -403,6 +403,13 @@ body {
         <span class="btn-sub">2022 – 2026</span>
       </span>
     </button>
+   <button class="building-btn" data-id="Herman Vosstraat" onclick="selectBuilding(this)" data-name="Herman Vosstraat" data-address="2018 Antwerpen" data-years="2019 – 2025">
+  <span class="btn-icon">🏛️</span>
+  <span class="btn-text">
+    <span class="btn-name">Herman Vosstraat</span>
+    <span class="btn-sub">2019 – 2025</span>
+  </span>
+ </button>
     <div id="dynamicBuildings"></div>
   </nav>
  
@@ -1215,6 +1222,309 @@ inited['trends']=true;
 </body>
 </html>"
       sandbox="allow-scripts allow-same-origin"></iframe>
+  
+   <iframe class="dash-frame" id="frame-HermanVosstraat"
+  srcdoc="<div style="padding:0.75rem 0;">
+
+<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:1.5rem;">
+  <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:1rem;">
+    <p style="font-size:11px;color:var(--color-text-secondary);margin:0 0 4px;text-transform:uppercase;letter-spacing:.04em;">Totaal 2025</p>
+    <p style="font-size:20px;font-weight:500;margin:0;">€39.621</p>
+    <p style="font-size:11px;color:#3B6D11;margin:4px 0 0;">▼ -17.2% vs 2024</p>
+  </div>
+  <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:1rem;">
+    <p style="font-size:11px;color:var(--color-text-secondary);margin:0 0 4px;text-transform:uppercase;letter-spacing:.04em;">Gemiddeld/jaar</p>
+    <p style="font-size:20px;font-weight:500;margin:0;">€35.606</p>
+    <p style="font-size:11px;color:var(--color-text-secondary);margin:4px 0 0;">2019 – 2025</p>
+  </div>
+  <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:1rem;">
+    <p style="font-size:11px;color:var(--color-text-secondary);margin:0 0 4px;text-transform:uppercase;letter-spacing:.04em;">Grootste post 2025</p>
+    <p style="font-size:20px;font-weight:500;margin:0;">Gas</p>
+    <p style="font-size:11px;color:var(--color-text-secondary);margin:4px 0 0;">€18.778 · 47% van totaal</p>
+  </div>
+  <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:1rem;">
+    <p style="font-size:11px;color:var(--color-text-secondary);margin:0 0 4px;text-transform:uppercase;letter-spacing:.04em;">Sterkste stijger</p>
+    <p style="font-size:20px;font-weight:500;margin:0;">Sanitair &amp; verwarming</p>
+    <p style="font-size:11px;color:#A32D2D;margin:4px 0 0;">▲ +221% over 7 jaar</p>
+  </div>
+</div>
+
+<div style="display:flex;gap:0;margin-bottom:1.25rem;border-bottom:0.5px solid var(--color-border-tertiary);">
+  <button id="tab-trends" onclick="showTab('trends')" style="padding:8px 14px;font-size:13px;border:none;border-bottom:2px solid var(--color-text-primary);background:none;cursor:pointer;color:var(--color-text-primary);margin-bottom:-1px;">Trends</button>
+  <button id="tab-verdeling" onclick="showTab('verdeling')" style="padding:8px 14px;font-size:13px;border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;color:var(--color-text-secondary);margin-bottom:-1px;">Kostenverdeling</button>
+  <button id="tab-vergelijking" onclick="showTab('vergelijking')" style="padding:8px 14px;font-size:13px;border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;color:var(--color-text-secondary);margin-bottom:-1px;">Jaar-op-jaar</button>
+  <button id="tab-analyse" onclick="showTab('analyse')" style="padding:8px 14px;font-size:13px;border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;color:var(--color-text-secondary);margin-bottom:-1px;">Analyse</button>
+  <button id="tab-uitschieters" onclick="showTab('uitschieters')" style="padding:8px 14px;font-size:13px;border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;color:var(--color-text-secondary);margin-bottom:-1px;">Uitschieters</button>
+</div>
+
+<div id="pane-trends">
+  <p style="font-size:12px;color:var(--color-text-secondary);margin:0 0 12px;padding:10px 12px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);">Evolutie van de totale kosten en de 4 grootste posten over 2019–2025. De piek in 2024 is volledig gedreven door uitzonderlijk hoge gaskosten (€22.838).</p>
+  <div style="display:flex;flex-wrap:wrap;gap:8px 14px;margin-bottom:10px;font-size:12px;color:var(--color-text-secondary);">
+    <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#378ADD"></span>Totaal</span>
+    <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#D85A30"></span>Gas</span>
+    <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#1D9E75"></span>Erelonen</span>
+    <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#D4537E"></span>Sanitair</span>
+    <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#639922"></span>Elektriciteit</span>
+  </div>
+  <div style="position:relative;width:100%;height:300px;"><canvas id="chartTrends"></canvas></div>
+</div>
+
+<div id="pane-verdeling" style="display:none;">
+  <p style="font-size:12px;color:var(--color-text-secondary);margin:0 0 12px;padding:10px 12px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);">Kostenverdeling per jaar. Selecteer een jaar om de donut en het jaartotaal te bekijken.</p>
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+    <span style="font-size:13px;color:var(--color-text-secondary);">Jaar:</span>
+    <div id="yearBtns" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px;">
+    <span style="font-size:13px;color:var(--color-text-secondary);">Totaal:</span>
+    <span id="verdTotaal" style="font-size:20px;font-weight:500;">--</span>
+  </div>
+  <div style="position:relative;width:100%;height:300px;"><canvas id="chartVerd"></canvas></div>
+  <div id="legendVerd" style="display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:12px;font-size:12px;color:var(--color-text-secondary);"></div>
+</div>
+
+<div id="pane-vergelijking" style="display:none;">
+  <p style="font-size:12px;color:var(--color-text-secondary);margin:0 0 12px;padding:10px 12px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);">Vergelijk twee opeenvolgende jaren per kostenpost. Tooltip toont ook het procentueel verschil.</p>
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+    <span style="font-size:13px;color:var(--color-text-secondary);">Periode:</span>
+    <div id="perioBtns" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+  </div>
+  <div id="vergLegend" style="display:flex;gap:12px;margin-bottom:8px;font-size:12px;color:var(--color-text-secondary);"></div>
+  <div id="vergWrap" style="position:relative;width:100%;"><canvas id="chartVerg"></canvas></div>
+</div>
+
+<div id="pane-analyse" style="display:none;">
+  <p style="font-size:12px;color:var(--color-text-secondary);margin:0 0 14px;padding:10px 12px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);">Gemiddeld bedrag per kostenpost (positieve jaren) en procentuele verandering per jaar. Rood = stijging &gt;15%, groen = daling &gt;10%.</p>
+  <div style="overflow-x:auto;">
+  <table style="width:100%;font-size:12px;border-collapse:collapse;min-width:600px;">
+    <thead><tr style="border-bottom:0.5px solid var(--color-border-secondary);">
+      <th style="text-align:left;padding:8px 6px;font-size:11px;font-weight:500;color:var(--color-text-secondary);min-width:160px;">Kostenpost</th>
+      <th style="text-align:right;padding:8px 6px;font-size:11px;font-weight:500;color:var(--color-text-secondary);">Gem.</th>
+      <th style="text-align:right;padding:8px 6px;font-size:11px;font-weight:500;color:var(--color-text-secondary);">2020</th>
+      <th style="text-align:right;padding:8px 6px;font-size:11px;font-weight:500;color:var(--color-text-secondary);">2021</th>
+      <th style="text-align:right;padding:8px 6px;font-size:11px;font-weight:500;color:var(--color-text-secondary);">2022</th>
+      <th style="text-align:right;padding:8px 6px;font-size:11px;font-weight:500;color:var(--color-text-secondary);">2023</th>
+      <th style="text-align:right;padding:8px 6px;font-size:11px;font-weight:500;color:var(--color-text-secondary);">2024</th>
+      <th style="text-align:right;padding:8px 6px;font-size:11px;font-weight:500;color:var(--color-text-secondary);">2025</th>
+    </tr></thead>
+    <tbody id="analyseBody"></tbody>
+  </table>
+  </div>
+</div>
+
+<div id="pane-uitschieters" style="display:none;">
+  <p style="font-size:12px;color:var(--color-text-secondary);margin:0 0 14px;padding:10px 12px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);">Verklaring van de opvallende kost­pieken per jaar, op basis van de factuuranalyse 2019–2025.</p>
+
+  <div style="display:flex;flex-direction:column;gap:10px;" id="uitschietersLijst">
+
+    <div style="border-radius:var(--border-radius-md);border-left:3px solid #A32D2D;background:var(--color-background-secondary);padding:12px 14px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px;">
+        <span style="font-size:13px;font-weight:500;color:var(--color-text-primary);">Gas 2024 — Recordpiek €22.838</span>
+        <span style="font-size:11px;font-weight:600;color:#A32D2D;white-space:nowrap;background:rgba(163,45,45,0.1);padding:2px 8px;border-radius:12px;">+171% vs 2023</span>
+      </div>
+      <p style="font-size:12px;color:var(--color-text-secondary);margin:0;line-height:1.6;">Massale inhaalfacturen van Engie Electrabel voor periodes die teruggingen tot 2022–2023, gecombineerd met structureel hogere energietarieven. In hetzelfde jaar werden ook correctiefacturen van €818 (Q1 2023) meegenomen. Dit is het absolute recordjaar voor gaskosten in 7 jaar.</p>
+    </div>
+
+    <div style="border-radius:var(--border-radius-md);border-left:3px solid #A32D2D;background:var(--color-background-secondary);padding:12px 14px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px;">
+        <span style="font-size:13px;font-weight:500;color:var(--color-text-primary);">Gas 2021 — Energiecrisis €13.239</span>
+        <span style="font-size:11px;font-weight:600;color:#A32D2D;white-space:nowrap;background:rgba(163,45,45,0.1);padding:2px 8px;border-radius:12px;">+99% vs 2020</span>
+      </div>
+      <p style="font-size:12px;color:var(--color-text-secondary);margin:0;line-height:1.6;">De Europese gasmarktprijzen verdubbelden in de tweede helft van 2021. Tegelijk werden afrekeningen van de periode 2020–2021 gelijktijdig geboekt in juli 2021 (o.a. €628, €1.241, €1.441 voor Engie-afrekeningen). Structurele energiecrisis — geen eenmalige oorzaak.</p>
+    </div>
+
+    <div style="border-radius:var(--border-radius-md);border-left:3px solid #A32D2D;background:var(--color-background-secondary);padding:12px 14px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px;">
+        <span style="font-size:13px;font-weight:500;color:var(--color-text-primary);">Elektriciteit 2022 — Tariefexplosie €6.536</span>
+        <span style="font-size:11px;font-weight:600;color:#A32D2D;white-space:nowrap;background:rgba(163,45,45,0.1);padding:2px 8px;border-radius:12px;">+78% vs 2021</span>
+      </div>
+      <p style="font-size:12px;color:var(--color-text-secondary);margin:0;line-height:1.6;">Elektriciteitstarieven verviervoudigden door de energiecrisis. Jaarafrekeningen van Engie Electrabel voor de periode juli 2021 – mei 2022 werden in juni 2022 ontvangen (o.a. €681, €466, €428), wat een cumulatief effect gaf op één boekjaar.</p>
+    </div>
+
+    <div style="border-radius:var(--border-radius-md);border-left:3px solid #A32D2D;background:var(--color-background-secondary);padding:12px 14px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px;">
+        <span style="font-size:13px;font-weight:500;color:var(--color-text-primary);">Procedurekosten 2021 — Deskundige Susheeva €5.333</span>
+        <span style="font-size:11px;font-weight:600;color:#A32D2D;white-space:nowrap;background:rgba(163,45,45,0.1);padding:2px 8px;border-radius:12px;">Eenmalig</span>
+      </div>
+      <p style="font-size:12px;color:var(--color-text-secondary);margin:0;line-height:1.6;">Aanstelling van een gerechtelijk deskundige in het invorderingsdossier-Susheeva: voorschot €1.500 (maart) + definitieve kostennota €4.178 (augustus). Dit is een eenmalige juridische kost gekoppeld aan één specifiek geschil, niet structureel.</p>
+    </div>
+
+    <div style="border-radius:var(--border-radius-md);border-left:3px solid #A32D2D;background:var(--color-background-secondary);padding:12px 14px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px;">
+        <span style="font-size:13px;font-weight:500;color:var(--color-text-primary);">Sanitair & verwarming 2024 — Nieuwe afvoerleiding €6.700</span>
+        <span style="font-size:11px;font-weight:600;color:#A32D2D;white-space:nowrap;background:rgba(163,45,45,0.1);padding:2px 8px;border-radius:12px;">+65% vs 2023</span>
+      </div>
+      <p style="font-size:12px;color:var(--color-text-secondary);margin:0;line-height:1.6;">Riomax plaatste een nieuwe afvoerleiding (€4.699), deels gedekt door het reservekapitaal. Daarnaast werd in hetzelfde jaar de ketelinstallatie grondig onderhouden (Air Consult, €2.668 + €196). De netto-kost na reservekapitaalinterventie is €2.001 — het brutobedrag geeft een vertekend beeld.</p>
+    </div>
+
+    <div style="border-radius:var(--border-radius-md);border-left:3px solid #3B6D11;background:var(--color-background-secondary);padding:12px 14px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px;">
+        <span style="font-size:13px;font-weight:500;color:var(--color-text-primary);">Procedurekosten 2025 — Grote terugvordering -€6.882</span>
+        <span style="font-size:11px;font-weight:600;color:#3B6D11;white-space:nowrap;background:rgba(59,109,17,0.1);padding:2px 8px;border-radius:12px;">Positief effect</span>
+      </div>
+      <p style="font-size:12px;color:var(--color-text-secondary);margin:0;line-height:1.6;">€7.446 aan nalatigheidskosten werd teruggevorderd van achterstallige eigenaars (dossiers Eijsackers, Nouri, Vandevelde-Badisco). Dit maakt de post sterk negatief — een gunstig boekhoudkundig effect. Zonder deze terugvordering zou het totaal 2025 uitkomen op ca. €46.503 (+€6.882).</p>
+    </div>
+
+    <div style="border-radius:var(--border-radius-md);border-left:3px solid #BA7517;background:var(--color-background-secondary);padding:12px 14px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px;">
+        <span style="font-size:13px;font-weight:500;color:var(--color-text-primary);">Administratiekosten 2019 — Opstartjaar €2.251</span>
+        <span style="font-size:11px;font-weight:600;color:#BA7517;white-space:nowrap;background:rgba(186,117,23,0.1);padding:2px 8px;border-radius:12px;">Eenmalig (start)</span>
+      </div>
+      <p style="font-size:12px;color:var(--color-text-secondary);margin:0;line-height:1.6;">Bij de start van het nieuwe beheer (Algemeen Beheer 2.0) werden éénmalige kosten gemaakt: juridische dossiers opstarten (€1.600), dossierkosten (€290), opvragen plannen & kadaster (€120), scannen gebouwdocumenten (€221). Daarna daalde deze post structureel naar €300–966/jaar.</p>
+    </div>
+
+    <div style="border-radius:var(--border-radius-md);border-left:3px solid #BA7517;background:var(--color-background-secondary);padding:12px 14px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px;">
+        <span style="font-size:13px;font-weight:500;color:var(--color-text-primary);">Water 2019 — Schijnbaar laag €187</span>
+        <span style="font-size:11px;font-weight:600;color:#BA7517;white-space:nowrap;background:rgba(186,117,23,0.1);padding:2px 8px;border-radius:12px;">Boekingstiming</span>
+      </div>
+      <p style="font-size:12px;color:var(--color-text-secondary);margin:0;line-height:1.6;">Het lage bedrag is geen weerspiegeling van laag waterverbruik, maar van boekingstiming: meerdere creditnotas (CN) van Water-Link werden in hetzelfde jaar als de facturen geboekt, waardoor het nettosaldo slechts €187 bedraagt. Vanaf 2020 normaliseert het waterverbruik naar ca. €500–550/jaar.</p>
+    </div>
+
+  </div>
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const years=[2019, 2020, 2021, 2022, 2023, 2024, 2025];
+const totals=[28228.31, 24075.83, 40690.67, 34309.96, 34491.87, 47824.97, 39621.15];
+const periods=["2019→2020", "2020→2021", "2021→2022", "2022→2023", "2023→2024", "2024→2025"];
+const cats=[{"name": "Gas", "values": [10174.84, 6654.81, 13239.23, 8935.94, 8445.77, 22838.27, 18778.33], "color": "#D85A30"}, {"name": "Erelonen", "values": [6806.02, 7763.12, 8512.46, 10245.56, 11417.16, 10269.46, 12461.95], "color": "#1D9E75"}, {"name": "Sanitair & verwarming", "values": [1859.95, 2311.35, 3734.53, 2375.36, 4056.4, 6700.26, 5963.01], "color": "#D4537E"}, {"name": "Elektriciteit", "values": [4005.79, 3104.81, 3668.03, 6535.91, 6161.76, 4122.75, 4763.5], "color": "#639922"}, {"name": "Verzekeringen", "values": [2262.22, 2329.41, 2399.32, 2609.56, 2536.84, 2646.17, 2663.97], "color": "#888780"}, {"name": "Administratiekosten", "values": [2250.75, 300.0, 470.0, 600.0, 966.0, 827.0, 415.0], "color": "#7F77DD"}, {"name": "Water", "values": [186.57, 506.89, 536.76, 532.91, 518.41, 548.22, 467.58], "color": "#85B7EB"}, {"name": "Procedurekosten", "values": [-1170.22, 0.0, 5332.82, -124.39, -1655.88, -1440.69, -6881.67], "color": "#F09595"}, {"name": "El. installaties", "values": [276.18, 169.6, 444.67, 397.61, 1797.23, 206.49, 1093.01], "color": "#9FE1CB"}, {"name": "Financiele kosten", "values": [101.7, 30.0, 42.8, 289.0, 248.18, 232.04, 301.47], "color": "#FAC775"}, {"name": "Diversen", "values": [0.0, 97.5, 619.33, 1912.5, 0.0, 0.0, 0.0], "color": "#AFA9EC"}, {"name": "Onderhoud bouwwerken", "values": [0.0, 19.08, 1104.38, 0.0, 0.0, 0.0, 0.0], "color": "#B4B2A9"}, {"name": "Kosten vergaderingen", "values": [200.0, 200.0, 0.0, 0.0, 0.0, 875.0, 0.0], "color": "#5DCAA5"}, {"name": "Privatieve kosten", "values": [1244.14, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "color": "#F5C4B3"}, {"name": "Verzekeringsdossiers", "values": [0.0, 589.26, 586.34, 0.0, 0.0, 0.0, 0.0], "color": "#BA7517"}];
+
+function fmt(v){if(v===null||v===undefined)return'--';return(v<0?'-':'')+'€'+Math.abs(Math.round(v)).toLocaleString('nl-BE');}
+function posAvg(arr){const v=arr.filter(x=>x>0);return v.length?v.reduce((a,b)=>a+b,0)/v.length:0;}
+function fmtPct(v){if(v===null||isNaN(v)||!isFinite(v))return'<span style="color:var(--color-text-secondary)">--</span>';const s=v>=0?'+':'';return`<span style="color:${v>15?'#A32D2D':v<-10?'#3B6D11':'var(--color-text-secondary)'}">${s}${v.toFixed(0)}%</span>`;}
+
+const inited={};let verdChart=null,vergChart=null;
+
+function showTab(name){
+  ['trends','verdeling','vergelijking','analyse','uitschieters'].forEach(t=>{
+    document.getElementById('pane-'+t).style.display=t===name?'block':'none';
+    const btn=document.getElementById('tab-'+t);
+    btn.style.color=t===name?'var(--color-text-primary)':'var(--color-text-secondary)';
+    btn.style.borderBottom=t===name?'2px solid var(--color-text-primary)':'2px solid transparent';
+  });
+  if(!inited[name]){buildTab(name);inited[name]=true;}
+}
+
+function buildTab(name){
+  if(name==='trends'){
+    new Chart(document.getElementById('chartTrends'),{
+      type:'line',
+      data:{labels:years,datasets:[
+        {label:'Totaal',data:totals,borderColor:'#378ADD',backgroundColor:'rgba(55,138,221,0.08)',tension:0.35,fill:true,borderWidth:2.5,pointRadius:4},
+        {label:'Gas',data:cats[0].values,borderColor:'#D85A30',backgroundColor:'transparent',tension:0.35,borderWidth:2,pointRadius:3},
+        {label:'Erelonen',data:cats[1].values,borderColor:'#1D9E75',backgroundColor:'transparent',tension:0.35,borderWidth:2,pointRadius:3},
+        {label:'Sanitair',data:cats[2].values,borderColor:'#D4537E',backgroundColor:'transparent',tension:0.35,borderWidth:2,pointRadius:3},
+        {label:'Elektriciteit',data:cats[3].values,borderColor:'#639922',backgroundColor:'transparent',tension:0.35,borderWidth:2,pointRadius:3,borderDash:[4,3]},
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+fmt(ctx.raw)}}},
+        scales:{y:{ticks:{callback:v=>'€'+(v/1000).toFixed(0)+'k'},grid:{color:'rgba(128,128,128,0.1)'}},x:{grid:{display:false}}}
+      }
+    });
+  } else if(name==='verdeling'){
+    const btns=document.getElementById('yearBtns');
+    years.forEach((y,i)=>{
+      const b=document.createElement('button');
+      b.textContent=y;
+      b.style.cssText='padding:5px 12px;font-size:12px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:'+(i===years.length-1?'var(--color-text-primary)':'none')+';color:'+(i===years.length-1?'var(--color-background-primary)':'var(--color-text-secondary)')+';cursor:pointer;';
+      b.onclick=()=>updateVerd(i);
+      btns.appendChild(b);
+    });
+    buildVerdChart(years.length-1);
+  } else if(name==='vergelijking'){
+    const btns=document.getElementById('perioBtns');
+    periods.forEach((p,i)=>{
+      const b=document.createElement('button');
+      b.textContent=p;
+      b.style.cssText='padding:5px 12px;font-size:12px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:'+(i===periods.length-1?'var(--color-text-primary)':'none')+';color:'+(i===periods.length-1?'var(--color-background-primary)':'var(--color-text-secondary)')+';cursor:pointer;';
+      b.onclick=()=>updateVerg(i);
+      btns.appendChild(b);
+    });
+    buildVergChart(periods.length-1);
+  } else if(name==='analyse'){
+    const body=document.getElementById('analyseBody');
+    const sorted=[...cats].sort((a,b)=>posAvg(b.values)-posAvg(a.values));
+    sorted.forEach((c,i)=>{
+      const pa=posAvg(c.values);
+      const pcts=[];
+      for(let j=1;j<c.values.length;j++){
+        const prev=c.values[j-1],cur=c.values[j];
+        pcts.push(prev!==0&&cur!==0?((cur-prev)/Math.abs(prev))*100:null);
+      }
+      body.innerHTML+=`<tr style="border-bottom:0.5px solid var(--color-border-tertiary);background:${i%2===0?'transparent':'var(--color-background-secondary)'};">
+        <td style="padding:7px 6px;font-size:12px;"><span style="display:inline-flex;align-items:center;gap:5px;"><span style="width:7px;height:7px;border-radius:50%;background:${c.color};flex-shrink:0;display:inline-block;"></span>${c.name}</span></td>
+        <td style="padding:7px 6px;text-align:right;">${fmt(pa)}</td>
+        ${pcts.map(p=>`<td style="padding:7px 6px;text-align:right;">${fmtPct(p)}</td>`).join('')}
+      </tr>`;
+    });
+    const totalPcts=[];
+    for(let j=1;j<totals.length;j++) totalPcts.push(((totals[j]-totals[j-1])/totals[j-1])*100);
+    body.innerHTML+=`<tr style="border-top:1px solid var(--color-border-primary);">
+      <td style="padding:8px 6px;font-size:13px;font-weight:500;">Totaal</td>
+      <td style="padding:8px 6px;text-align:right;font-size:13px;font-weight:500;">${fmt(totals.reduce((a,b)=>a+b,0)/totals.length)}</td>
+      ${totalPcts.map(p=>`<td style="padding:8px 6px;text-align:right;font-size:13px;">${fmtPct(p)}</td>`).join('')}
+    </tr>`;
+  }
+}
+
+function buildVerdChart(yi){
+  const posVals=cats.map(c=>Math.max(0,c.values[yi]));
+  const total=posVals.reduce((a,b)=>a+b,0);
+  document.getElementById('verdTotaal').textContent=fmt(totals[yi]);
+  const sorted=cats.map(c=>({name:c.name,v:Math.max(0,c.values[yi]),color:c.color})).filter(c=>c.v>0).sort((a,b)=>b.v-a.v);
+  const top8=sorted.slice(0,8);
+  const otherV=sorted.slice(8).reduce((s,c)=>s+c.v,0);
+  const labels=[...top8.map(c=>c.name),...(otherV>0?['Overige']:[])];
+  const data=[...top8.map(c=>Math.round(c.v)),...(otherV>0?[Math.round(otherV)]:[])];
+  const colors=[...top8.map(c=>c.color),...(otherV>0?['#B4B2A9']:[])];
+  if(verdChart){verdChart.destroy();}
+  verdChart=new Chart(document.getElementById('chartVerd'),{
+    type:'doughnut',
+    data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:1,hoverOffset:6}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.label+': '+fmt(ctx.raw)+' ('+Math.round(ctx.raw/total*100)+'%)'}}}}
+  });
+  const leg=document.getElementById('legendVerd');leg.innerHTML='';
+  labels.forEach((l,i)=>{const pct=Math.round(data[i]/total*100);leg.innerHTML+=`<span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:${colors[i]};flex-shrink:0;"></span>${l} ${pct}%</span>`;});
+}
+
+function updateVerd(i){
+  document.querySelectorAll('#yearBtns button').forEach((b,j)=>{b.style.background=j===i?'var(--color-text-primary)':'none';b.style.color=j===i?'var(--color-background-primary)':'var(--color-text-secondary)';});
+  buildVerdChart(i);
+}
+
+function buildVergChart(pi){
+  const iA=pi,iB=pi+1;
+  const yA=years[iA],yB=years[iB];
+  const filtered=cats.filter(c=>c.values[iA]!==0||c.values[iB]!==0).sort((a,b)=>((b.values[iA]+b.values[iB])/2)-((a.values[iA]+a.values[iB])/2));
+  const h=Math.max(420,filtered.length*50+80);
+  document.getElementById('vergWrap').style.height=h+'px';
+  document.getElementById('vergLegend').innerHTML=`<span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#B5D4F4;"></span>${yA}</span><span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#185FA5;"></span>${yB}</span>`;
+  if(vergChart){vergChart.destroy();}
+  vergChart=new Chart(document.getElementById('chartVerg'),{
+    type:'bar',
+    data:{labels:filtered.map(c=>c.name),datasets:[
+      {label:''+yA,data:filtered.map(c=>Math.round(Math.max(0,c.values[iA]))),backgroundColor:'#B5D4F4',borderWidth:0,borderRadius:3},
+      {label:''+yB,data:filtered.map(c=>Math.round(Math.max(0,c.values[iB]))),backgroundColor:'#185FA5',borderWidth:0,borderRadius:3}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{const diff=filtered[ctx.dataIndex].values[iB]-filtered[ctx.dataIndex].values[iA];const base=filtered[ctx.dataIndex].values[iA];const pct=base!==0?((diff/Math.abs(base))*100).toFixed(1):'n.v.t.';return ctx.dataset.label+': '+fmt(ctx.raw)+(ctx.datasetIndex===1&&base!==0?' '+(diff>=0?'+':'')+pct+'%':'')+'';} }}},
+      scales:{x:{ticks:{callback:v=>'€'+(v/1000).toFixed(0)+'k'},grid:{color:'rgba(128,128,128,0.1)'}},y:{ticks:{font:{size:11}},grid:{display:false}}}
+    }
+  });
+}
+
+function updateVerg(i){
+  document.querySelectorAll('#perioBtns button').forEach((b,j)=>{b.style.background=j===i?'var(--color-text-primary)':'none';b.style.color=j===i?'var(--color-background-primary)':'var(--color-text-secondary)';});
+  buildVergChart(i);
+}
+
+buildTab('trends');inited['trends']=true;
+</script>"
+  sandbox="allow-scripts allow-same-origin"></iframe>
  
     <div id="dynamicFrames"></div>
   </div>
@@ -1257,7 +1567,8 @@ let customBuildings = [];
 const buildings = {
   belgielei: {name:'Belgiëlei 68', address:'Antwerpen', years:'2020 – 2025'},
   lambrechts: {name:'Lambrechtshoeklaan 116', address:'Antwerpen', years:'2019 – 2025'},
-  potvliet: {name:'Potvlietlaan', address:'Antwerpen', years:'2022 – 2026'}
+  potvliet: {name:'Potvlietlaan', address:'Antwerpen', years:'2022 – 2026'} 
+  hermanvosstraat: {name:'HermanVosstraat', address:'Antwerpen', years:'2019 – 2025'}
 };
  
 function selectBuilding(btn) {
