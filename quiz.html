@@ -1,0 +1,581 @@
+<title>Caféquiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+/* Layout: één kolom, schoolbord-look (bewust één donker thema), live scorebord bovenaan tijdens het spel */
+:root {
+  --board: #17302a;
+  --board-2: #1f3d35;
+  --line: #2f5448;
+  --chalk: #f3efe2;
+  --chalk-dim: #b9c4b8;
+  --accent: #f2b53a;
+  --accent-ink: #231a05;
+  --good: #5fd08a;
+  --bad: #ff7a6b;
+  --font-display: "Bricolage Grotesque", "Arial Black", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  margin: 0; background: var(--board); color: var(--chalk);
+  font-family: var(--font-body); font-size: 18px; line-height: 1.45;
+  -webkit-tap-highlight-color: transparent;
+}
+.wrap { max-width: 720px; margin: 0 auto; padding-inline: 16px; padding-block: 16px 48px; display: flex; flex-direction: column; gap: 20px; }
+h1, h2, h3 { font-family: var(--font-display); margin: 0; text-wrap: balance; line-height: 1.1; }
+h1 { font-size: clamp(2.4rem, 9vw, 3.6rem); font-weight: 800; letter-spacing: -0.02em; }
+h1 span { color: var(--accent); }
+h2 { font-size: clamp(1.6rem, 6vw, 2.2rem); font-weight: 800; }
+.eyebrow { font-size: .8rem; text-transform: uppercase; letter-spacing: .14em; color: var(--chalk-dim); font-weight: 700; }
+.muted { color: var(--chalk-dim); }
+.stack { display: flex; flex-direction: column; gap: 12px; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; }
+button { font: inherit; cursor: pointer; border: 0; color: inherit; }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.btn {
+  min-height: 60px; padding: 14px 20px; border-radius: 14px; font-weight: 700; font-size: 1.15rem;
+  background: var(--board-2); border: 2px solid var(--line); color: var(--chalk);
+  transition: transform .08s ease, background .15s ease;
+}
+.btn:active { transform: scale(.98); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn.good { background: var(--good); color: #0b2415; border-color: var(--good); }
+.btn.bad { background: var(--bad); color: #2a0b07; border-color: var(--bad); }
+.btn.block { width: 100%; }
+.btn[disabled] { opacity: .35; cursor: not-allowed; }
+.grow { flex: 1 1 0; min-width: 0; }
+
+/* Setup */
+.player-row { display: flex; gap: 8px; align-items: center; }
+.player-row .num { width: 2ch; font-family: var(--font-display); font-weight: 800; color: var(--accent); font-size: 1.3rem; text-align: right; font-variant-numeric: tabular-nums; }
+.player-row input {
+  flex: 1; min-width: 0; min-height: 56px; font: inherit; font-size: 1.15rem; padding: 10px 14px;
+  background: var(--board-2); color: var(--chalk); border: 2px solid var(--line); border-radius: 12px;
+}
+.player-row input::placeholder { color: var(--chalk-dim); opacity: .7; }
+.x { width: 52px; min-height: 56px; border-radius: 12px; background: transparent; border: 2px solid var(--line); color: var(--chalk-dim); font-size: 1.4rem; }
+.seg { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 8px; }
+.seg button { min-height: 52px; border-radius: 12px; background: var(--board-2); border: 2px solid var(--line); font-weight: 700; font-size: 1.05rem; padding: 8px; }
+.seg button[aria-pressed="true"] { background: var(--chalk); color: var(--board); border-color: var(--chalk); }
+.panel { border: 2px dashed var(--line); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+.err { color: var(--bad); font-weight: 700; min-height: 1.4em; }
+
+/* Scorebord */
+.scores { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
+.chip { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 999px; background: var(--board-2); border: 2px solid var(--line); font-weight: 700; white-space: nowrap; }
+.chip b { font-family: var(--font-display); font-variant-numeric: tabular-nums; color: var(--accent); font-size: 1.1rem; }
+.chip.now { border-color: var(--accent); background: #2b3d24; }
+.chip .j { font-size: .7rem; letter-spacing: .08em; padding: 2px 6px; border-radius: 6px; background: var(--line); color: var(--chalk-dim); }
+.bump { animation: bump .5s ease; }
+@keyframes bump { 40% { transform: scale(1.12); } }
+
+.topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.progress { height: 6px; background: var(--board-2); border-radius: 99px; overflow: hidden; }
+.progress i { display: block; height: 100%; background: var(--accent); transition: width .3s ease; }
+
+.turn { display: flex; flex-direction: column; gap: 4px; }
+.turn .who { font-family: var(--font-display); font-weight: 800; font-size: clamp(2.2rem, 10vw, 3.4rem); color: var(--accent); line-height: 1; word-break: break-word; }
+
+.cats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.cat { min-height: 88px; border-radius: 16px; padding: 12px; text-align: left; background: var(--board-2); border: 2px solid var(--line); display: flex; flex-direction: column; justify-content: space-between; gap: 6px; }
+.cat strong { font-family: var(--font-display); font-size: 1.25rem; line-height: 1.1; }
+.cat small { color: var(--chalk-dim); font-size: .85rem; }
+.cat .ico { font-size: 1.6rem; line-height: 1; }
+.cat[disabled] { opacity: .35; }
+
+.qcard { background: var(--chalk); color: var(--board); border-radius: 18px; padding: 20px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 6px 0 #0d1d18; }
+.qcard .meta { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: .85rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: #4b5d55; }
+.qcard .q { font-family: var(--font-display); font-weight: 600; font-size: clamp(1.4rem, 5.5vw, 1.9rem); line-height: 1.2; text-wrap: pretty; }
+.opts { display: grid; gap: 10px; }
+.opt { min-height: 64px; text-align: left; padding: 12px 16px; border-radius: 14px; background: var(--board-2); border: 2px solid var(--line); font-size: 1.15rem; font-weight: 700; display: flex; gap: 12px; align-items: center; }
+.opt .l { flex: 0 0 auto; width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: var(--line); font-family: var(--font-display); }
+.opt.correct { background: var(--good); color: #0b2415; border-color: var(--good); }
+.opt.correct .l { background: #0b241522; }
+.opt.wrong { background: var(--bad); color: #2a0b07; border-color: var(--bad); }
+.opt.wrong .l { background: #2a0b0722; }
+.opt.gone { opacity: .2; text-decoration: line-through; }
+.opt[disabled] { cursor: default; }
+
+.reveal { border-radius: 16px; padding: 16px; background: var(--board-2); border: 2px solid var(--line); display: flex; flex-direction: column; gap: 6px; }
+.reveal .ans { font-family: var(--font-display); font-weight: 800; font-size: 1.7rem; color: var(--accent); }
+.verdict { font-family: var(--font-display); font-weight: 800; font-size: 1.6rem; }
+.verdict.ok { color: var(--good); } .verdict.no { color: var(--bad); }
+
+/* Einde */
+.podium { display: flex; flex-direction: column; gap: 8px; }
+.rank { display: grid; grid-template-columns: 2.5ch 1fr auto; gap: 12px; align-items: center; padding: 14px 16px; border-radius: 14px; background: var(--board-2); border: 2px solid var(--line); }
+.rank .p { font-family: var(--font-display); font-weight: 800; color: var(--chalk-dim); font-variant-numeric: tabular-nums; }
+.rank .n { font-weight: 700; font-size: 1.15rem; min-width: 0; overflow-wrap: anywhere; }
+.rank .s { font-family: var(--font-display); font-weight: 800; font-size: 1.4rem; font-variant-numeric: tabular-nums; }
+.rank.first { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.rank.first .p { color: var(--accent-ink); }
+.winner { text-align: center; display: flex; flex-direction: column; gap: 6px; padding-block: 12px; }
+.winner .big { font-family: var(--font-display); font-weight: 800; font-size: clamp(2.4rem, 11vw, 4rem); color: var(--accent); line-height: 1; overflow-wrap: anywhere; }
+.confirm { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.linkbtn { background: none; color: var(--chalk-dim); text-decoration: underline; padding: 8px 4px; font-size: .95rem; }
+
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+
+<div class="wrap" id="app"></div>
+
+<script>
+// ---------- Vragen ----------
+// MC: [vraag, juist antwoord, [3 foute opties]]   Open: [vraag, antwoord]
+const CATS = [
+  { id: "film", name: "Films", ico: "🎬", qs: [
+    ["Wie regisseerde 'Jaws' (1975)?", "Steven Spielberg", ["George Lucas", "Martin Scorsese", "Francis Ford Coppola"]],
+    ["Welke film van James Cameron won 11 Oscars in 1998?", "Titanic", ["Avatar", "Aliens", "The Abyss"]],
+    ["Hoe heet de hobbit die de Ene Ring naar Mordor brengt in The Lord of the Rings?", "Frodo (Balings / Baggins)"],
+    ["In welke film zegt Arnold Schwarzenegger voor het eerst \"I'll be back\"?", "The Terminator", ["Predator", "Total Recall", "Commando"]],
+    ["Welke acteur speelt Captain Jack Sparrow?", "Johnny Depp", ["Orlando Bloom", "Brad Pitt", "Jude Law"]],
+    ["Welke kleur pil slikt Neo in The Matrix?", "Rood", ["Blauw", "Groen", "Wit"]],
+    ["In welke stad speelt 'Le Fabuleux Destin d'Amélie Poulain'?", "Parijs", ["Lyon", "Marseille", "Brussel"]],
+    ["Welke film van Lukas Dhont won in 2022 de Grand Prix in Cannes?", "Close", ["Girl", "Rundskop", "Duelles"]],
+    ["Wie speelde de Joker in The Dark Knight (2008)?", "Heath Ledger", ["Joaquin Phoenix", "Jack Nicholson", "Jared Leto"]],
+    ["Wat voor vis is Nemo?", "Een clownvis", ["Een doktersvis", "Een kogelvis", "Een maanvis"]],
+    ["Hoe heet het fictieve Afrikaanse land in 'Black Panther'?", "Wakanda"],
+    ["Welke film eindigt met \"After all, tomorrow is another day\"?", "Gone with the Wind", ["Casablanca", "Citizen Kane", "The Wizard of Oz"]],
+    ["Wie regisseerde 'Pulp Fiction'?", "Quentin Tarantino", ["Guy Ritchie", "Robert Rodriguez", "David Fincher"]],
+    ["In welk jaar kwam de allereerste Star Wars-film in de bioscoop?", "1977", ["1973", "1980", "1983"]],
+    ["Welke acteur speelt zowel in 'Forrest Gump' als in 'Cast Away'?", "Tom Hanks", ["Kevin Costner", "Tom Cruise", "Robin Williams"]],
+    ["Hoe heet de koningin met ijskrachten in Disney's 'Frozen'?", "Elsa"],
+    ["Welke film won als eerste niet-Engelstalige film de Oscar voor Beste Film?", "Parasite", ["Roma", "Amour", "Crouching Tiger, Hidden Dragon"]],
+    ["Wie speelt James Bond in 'Casino Royale' (2006)?", "Daniel Craig", ["Pierce Brosnan", "Sean Connery", "Roger Moore"]],
+    ["In welke film komt het personage Hannibal Lecter voor?", "The Silence of the Lambs", ["Se7en", "Psycho", "Misery"]],
+    ["Welke Belgische acteur werd wereldberoemd met 'Bloodsport' en 'Universal Soldier'?", "Jean-Claude Van Damme", ["Matthias Schoenaerts", "Benoît Poelvoorde", "Jan Decleir"]],
+    ["Hoe heet de tovenaarsschool in Harry Potter?", "Zweinstein (Hogwarts)"],
+    ["In welke Pixar-film komt speelgoed tot leven als de mensen weg zijn?", "Toy Story", ["Cars", "Up", "Coco"]],
+    ["Welke Belgische film met Matthias Schoenaerts werd in 2012 genomineerd voor een Oscar?", "Rundskop", ["Loft", "De zaak Alzheimer", "Belgica"]],
+    ["Wie speelde Rose in 'Titanic'?", "Kate Winslet", ["Gwyneth Paltrow", "Nicole Kidman", "Cate Blanchett"]],
+  ]},
+  { id: "tv", name: "Series & TV", ico: "📺", qs: [
+    ["In welke stad speelt 'Breaking Bad' zich af?", "Albuquerque", ["Phoenix", "Las Vegas", "El Paso"]],
+    ["Hoe heet het koffiehuis waar de vrienden in 'Friends' altijd zitten?", "Central Perk"],
+    ["Hoe heet de baas van Homer Simpson in de kerncentrale?", "Mr. Burns", ["Mr. Smithers", "Moe", "Ned Flanders"]],
+    ["In welke serie speelt het verhaal zich af in Westeros?", "Game of Thrones", ["The Witcher", "Vikings", "The Last Kingdom"]],
+    ["Wie presenteert 'De Slimste Mens ter Wereld'?", "Erik Van Looy", ["Tom Waes", "Bart De Pauw", "Philippe Geubels"]],
+    ["Welke Vlaamse soap loopt al sinds 1995 op Eén (toen nog TV1)?", "Thuis", ["Familie", "Wittekerke", "Skilz"]],
+    ["Welke Spaanse serie draait om een overval op de Koninklijke Munt in Madrid?", "La Casa de Papel", ["Élite", "Narcos", "Las Chicas del Cable"]],
+    ["Bij welk papierbedrijf werken Michael Scott en co in 'The Office' (VS)?", "Dunder Mifflin"],
+    ["Welke serie volgt het leven van koningin Elizabeth II?", "The Crown", ["Downton Abbey", "Victoria", "Bridgerton"]],
+    ["Hoe noemen de kinderen het monster uit seizoen 1 van 'Stranger Things'?", "De Demogorgon", ["De Mind Flayer", "Vecna", "De Upside Down"]],
+    ["Wie trekt in 'Reizen Waes' naar bijzondere en vaak gevaarlijke plekken?", "Tom Waes", ["Wim Lybaert", "Otto-Jan Ham", "Jeroen Meus"]],
+    ["Hoe heet de scheikundeleraar die drugsbaron wordt in 'Breaking Bad'?", "Walter White"],
+    ["Welke streamingdienst bracht 'Squid Game' uit?", "Netflix", ["Disney+", "HBO Max", "Prime Video"]],
+    ["Uit welk land komt 'Squid Game'?", "Zuid-Korea", ["Japan", "China", "Taiwan"]],
+    ["In welke serie is Sheldon Cooper een van de hoofdpersonages?", "The Big Bang Theory", ["How I Met Your Mother", "Silicon Valley", "Community"]],
+    ["Hoe heet de tijdmachine (die eruitziet als een politiecabine) in 'Doctor Who'?", "De TARDIS"],
+    ["In welk tv-programma proberen kandidaten de saboteur in hun groep te ontmaskeren?", "Wie is de Mol?", ["The Voice", "Expeditie Robinson", "Big Brother"]],
+    ["Welke serie speelt zich af in het fictieve stadje Pawnee, Indiana?", "Parks and Recreation", ["Scrubs", "Veep", "Arrested Development"]],
+    ["Welke acteur speelde maffiabaas Tony Soprano?", "James Gandolfini", ["Robert De Niro", "Al Pacino", "Steve Buscemi"]],
+    ["Van welke familie is \"Winter is coming\" het motto in Game of Thrones?", "Stark", ["Lannister", "Targaryen", "Baratheon"]],
+    ["Hoe heet het aapje van Ross in 'Friends'?", "Marcel", ["George", "Bubbles", "Charlie"]],
+    ["Hoe heet de hond van Gert in het bekende Vlaamse kinderprogramma?", "Samson", ["Bobbie", "Pluto", "Boomer"]],
+    ["Welke serie vertelt het verhaal van de Colombiaanse drugsbaron Pablo Escobar?", "Narcos", ["Ozark", "Sicario", "El Chapo"]],
+    ["Waar stort het vliegtuig neer in de serie 'Lost'?", "Op een eiland", ["Op de Noordpool", "In een woestijn", "In het Amazonewoud"]],
+  ]},
+  { id: "hist", name: "Geschiedenis", ico: "🏛️", qs: [
+    ["In welk jaar viel de Berlijnse Muur?", "1989"],
+    ["Wie was de eerste keizer van het Romeinse Rijk?", "Augustus", ["Julius Caesar", "Nero", "Caligula"]],
+    ["In welk jaar werd België onafhankelijk?", "1830", ["1815", "1848", "1795"]],
+    ["Bij welke slag in 1815 werd Napoleon definitief verslagen?", "Waterloo"],
+    ["Wie zette als eerste mens voet op de maan?", "Neil Armstrong", ["Buzz Aldrin", "Joeri Gagarin", "John Glenn"]],
+    ["In welk jaar begon de Eerste Wereldoorlog?", "1914", ["1912", "1916", "1918"]],
+    ["Welke Belgische koning stond bekend als de 'Koning-Soldaat' tijdens WO I?", "Albert I", ["Leopold II", "Leopold III", "Boudewijn"]],
+    ["Welk vrijwel intact graf van een farao werd in 1922 ontdekt?", "Dat van Toetanchamon", ["Dat van Ramses II", "Dat van Cheops", "Dat van Achnaton"]],
+    ["Wie publiceerde in 1517 zijn 95 stellingen tegen de aflatenhandel?", "Maarten Luther", ["Johannes Calvijn", "Erasmus", "Jan Hus"]],
+    ["In welke stad werd president John F. Kennedy vermoord?", "Dallas", ["Houston", "Washington", "Chicago"]],
+    ["Welk rijk werd gesticht door Dzjengis Khan?", "Het Mongoolse Rijk", ["Het Ottomaanse Rijk", "Het Perzische Rijk", "Het Chinese Keizerrijk"]],
+    ["In welk jaar vond de Guldensporenslag plaats?", "1302", ["1214", "1356", "1477"]],
+    ["Wie was de eerste president van de Verenigde Staten?", "George Washington"],
+    ["Welk volk bouwde Machu Picchu?", "De Inca's", ["De Azteken", "De Maya's", "De Olmeken"]],
+    ["In welk jaar eindigde de Tweede Wereldoorlog in Europa?", "1945", ["1944", "1946", "1943"]],
+    ["Welke Belgische koning bezat Congo als persoonlijk eigendom?", "Leopold II", ["Leopold I", "Albert I", "Boudewijn"]],
+    ["Wie leidde de Sovjet-Unie tijdens de Tweede Wereldoorlog?", "Jozef Stalin", ["Vladimir Lenin", "Nikita Chroesjtsjov", "Leon Trotski"]],
+    ["In welk jaar kwam Columbus aan in Amerika?", "1492"],
+    ["Welke Romeinse stad werd in 79 n.C. bedolven onder de as van de Vesuvius?", "Pompeï", ["Rome", "Napels", "Ostia"]],
+    ["Welke Franse koning werd tijdens de Franse Revolutie onthoofd?", "Lodewijk XVI", ["Lodewijk XIV", "Lodewijk XV", "Napoleon III"]],
+    ["Met welk schip staken de Pilgrim Fathers in 1620 over naar Amerika?", "De Mayflower", ["De Santa María", "De Endeavour", "De Victoria"]],
+    ["Op welke Japanse stad viel in augustus 1945 de eerste atoombom?", "Hiroshima", ["Nagasaki", "Tokio", "Osaka"]],
+    ["Wie werd in 1994 de eerste zwarte president van Zuid-Afrika?", "Nelson Mandela", ["Desmond Tutu", "Thabo Mbeki", "Jacob Zuma"]],
+    ["In welke eeuw regeerde keizer Karel V, geboren in Gent?", "De 16e eeuw", ["De 15e eeuw", "De 17e eeuw", "De 14e eeuw"]],
+  ]},
+  { id: "pol", name: "Politiek", ico: "🗳️", qs: [
+    ["Hoeveel provincies telt België?", "10", ["9", "11", "12"]],
+    ["In welke stad heeft het Europees Parlement zijn officiële zetel?", "Straatsburg", ["Brussel", "Luxemburg", "Genève"]],
+    ["Hoeveel lidstaten telt de Europese Unie sinds de brexit?", "27", ["25", "26", "28"]],
+    ["Wie werd in februari 2025 premier van België?", "Bart De Wever", ["Alexander De Croo", "Theo Francken", "Georges-Louis Bouchez"]],
+    ["Hoe heet de 'lagere' kamer van het Belgische federale parlement?", "Kamer van Volksvertegenwoordigers", ["Senaat", "Vlaams Parlement", "Raad van State"]],
+    ["Hoeveel jaar duurt één ambtstermijn van een Amerikaanse president?", "4 jaar"],
+    ["In welke stad staat het hoofdkwartier van de NAVO?", "Brussel", ["Genève", "Den Haag", "Washington"]],
+    ["Welke Britse premier kreeg de bijnaam 'The Iron Lady'?", "Margaret Thatcher", ["Theresa May", "Liz Truss", "Queen Elizabeth"]],
+    ["Wat is het adres van de ambtswoning van de Britse premier?", "10 Downing Street"],
+    ["Hoeveel zetels telt de Belgische Kamer van Volksvertegenwoordigers?", "150", ["100", "120", "200"]],
+    ["Wie werd in 2019 de eerste vrouwelijke voorzitter van de Europese Commissie?", "Ursula von der Leyen", ["Angela Merkel", "Christine Lagarde", "Margrethe Vestager"]],
+    ["In welke stad zetelt het Internationaal Strafhof?", "Den Haag", ["Genève", "New York", "Brussel"]],
+    ["Welke kleur wordt geassocieerd met de Amerikaanse Republikeinen?", "Rood", ["Blauw", "Groen", "Oranje"]],
+    ["Wie is het staatshoofd van België?", "Koning Filip", ["De premier", "Koningin Mathilde", "De Kamervoorzitter"]],
+    ["Hoeveel permanente leden telt de VN-Veiligheidsraad?", "5", ["3", "7", "10"]],
+    ["In welk jaar stemden de Britten in een referendum voor de brexit?", "2016", ["2014", "2018", "2020"]],
+    ["Hoe heet het Duitse federale parlement?", "De Bondsdag (Bundestag)"],
+    ["Vanaf welke leeftijd mochten Belgen stemmen voor het Europees Parlement in 2024?", "16 jaar", ["17 jaar", "18 jaar", "21 jaar"]],
+    ["Welk land noemt zijn parlement de 'Knesset'?", "Israël", ["Iran", "Turkije", "Griekenland"]],
+    ["Wie was bondskanselier van Duitsland van 2005 tot 2021?", "Angela Merkel"],
+    ["Hoeveel gemeenschappen telt België?", "3", ["2", "4", "5"]],
+    ["Welke Amerikaanse president trad af na het Watergate-schandaal?", "Richard Nixon", ["Gerald Ford", "Jimmy Carter", "Lyndon B. Johnson"]],
+    ["In welk gebouw in Washington vergadert het Amerikaanse Congres?", "Het Capitool", ["Het Witte Huis", "Het Pentagon", "Het Lincoln Memorial"]],
+    ["Hoe noem je een regering die geen meerderheid heeft in het parlement?", "Een minderheidsregering", ["Een schaduwkabinet", "Een tripartite", "Een meerderheidsregering"]],
+  ]},
+  { id: "geo", name: "Aardrijkskunde", ico: "🌍", qs: [
+    ["Wat is de hoofdstad van Australië?", "Canberra", ["Sydney", "Melbourne", "Perth"]],
+    ["Wat is de langste rivier van Europa?", "De Wolga", ["De Donau", "De Rijn", "De Dnjepr"]],
+    ["Wat is de hoogste berg van Afrika?", "De Kilimanjaro"],
+    ["Wat is de hoofdstad van Canada?", "Ottawa", ["Toronto", "Montreal", "Vancouver"]],
+    ["In welk land ligt Timboektoe?", "Mali", ["Niger", "Marokko", "Senegal"]],
+    ["Aan hoeveel landen grenst België?", "4", ["3", "5", "6"]],
+    ["Wat is het hoogste punt van België?", "Signaal van Botrange", ["Kemmelberg", "Baraque de Fraiture", "Mont Rigi"]],
+    ["Welke zeestraat scheidt Spanje van Marokko?", "Straat van Gibraltar"],
+    ["Welk land is qua oppervlakte het grootste ter wereld?", "Rusland", ["Canada", "China", "Verenigde Staten"]],
+    ["Wat is de hoofdstad van Turkije?", "Ankara", ["Istanbul", "Izmir", "Antalya"]],
+    ["Aan welke rivier ligt Antwerpen?", "De Schelde", ["De Maas", "De Leie", "De Dender"]],
+    ["Welk land heeft sinds 2023 de meeste inwoners ter wereld?", "India", ["China", "Verenigde Staten", "Indonesië"]],
+    ["Wat is de hoofdstad van Zwitserland?", "Bern"],
+    ["Wat is de grootste hete woestijn ter wereld?", "De Sahara", ["De Gobi", "De Kalahari", "De Arabische woestijn"]],
+    ["Welke rivier stroomt door Caïro?", "De Nijl", ["De Congo", "De Niger", "De Eufraat"]],
+    ["Wat is de grootste oceaan?", "De Stille Oceaan", ["De Atlantische Oceaan", "De Indische Oceaan", "De Noordelijke IJszee"]],
+    ["Wat is de hoofdstad van Nieuw-Zeeland?", "Wellington", ["Auckland", "Christchurch", "Queenstown"]],
+    ["In welk land ligt Transsylvanië?", "Roemenië", ["Hongarije", "Bulgarije", "Servië"]],
+    ["Wat is de grootste Belgische provincie qua oppervlakte?", "Luxemburg", ["Luik", "Henegouwen", "Namen"]],
+    ["Welk land telt, met zijn overzeese gebieden, de meeste tijdzones?", "Frankrijk", ["Rusland", "Verenigde Staten", "Verenigd Koninkrijk"]],
+    ["Wat is de hoofdstad van Brazilië?", "Brasília", ["Rio de Janeiro", "São Paulo", "Salvador"]],
+    ["Wat is het diepste meer ter wereld?", "Het Baikalmeer", ["Het Tanganyikameer", "Het Victoriameer", "Het Bovenmeer"]],
+    ["Uit hoeveel staten bestaan de Verenigde Staten?", "50"],
+    ["Welk dwergstaatje ligt in de Pyreneeën tussen Frankrijk en Spanje?", "Andorra", ["Monaco", "San Marino", "Liechtenstein"]],
+  ]},
+  { id: "muz", name: "Muziek", ico: "🎵", qs: [
+    ["Welke band bracht 'Bohemian Rhapsody' uit?", "Queen", ["The Beatles", "Led Zeppelin", "Pink Floyd"]],
+    ["Uit welk land komt ABBA?", "Zweden", ["Noorwegen", "Denemarken", "Finland"]],
+    ["Welke Belgische artiest scoorde een wereldhit met 'Alors on danse'?", "Stromae"],
+    ["Hoeveel snaren heeft een standaard gitaar?", "6", ["4", "5", "7"]],
+    ["Wie wordt de 'King of Pop' genoemd?", "Michael Jackson", ["Elvis Presley", "Prince", "Justin Timberlake"]],
+    ["Welk festival vindt jaarlijks plaats in Boom?", "Tomorrowland", ["Rock Werchter", "Pukkelpop", "Graspop"]],
+    ["Wie won in 1986 als enige ooit het Songfestival voor België?", "Sandra Kim", ["Axelle Red", "Lara Fabian", "Natalia"]],
+    ["Van welke band was Kurt Cobain de zanger?", "Nirvana", ["Pearl Jam", "Soundgarden", "Foo Fighters"]],
+    ["Welke componist bleef componeren nadat hij doof was geworden?", "Ludwig van Beethoven", ["Wolfgang Amadeus Mozart", "Johann Sebastian Bach", "Frédéric Chopin"]],
+    ["Hoe heet het debuutalbum van Adele?", "19", ["21", "25", "30"]],
+    ["Wie zong 'Purple Rain'?", "Prince"],
+    ["Welke rapper heet eigenlijk Marshall Mathers?", "Eminem", ["50 Cent", "Dr. Dre", "Snoop Dogg"]],
+    ["Hoeveel toetsen heeft een standaard piano?", "88", ["76", "84", "96"]],
+    ["Uit welke stad kwamen The Beatles?", "Liverpool", ["Londen", "Manchester", "Birmingham"]],
+    ["Welke Belgische groep maakte 'Suds & Soda'?", "dEUS", ["Soulwax", "Triggerfinger", "K's Choice"]],
+    ["Welke zangeres noemt haar fans 'Swifties'?", "Taylor Swift"],
+    ["Met welk instrument werd Toots Thielemans wereldberoemd?", "De mondharmonica", ["De saxofoon", "De trompet", "De accordeon"]],
+    ["Welke Belg vond de saxofoon uit?", "Adolphe Sax"],
+    ["Wie zong 'Like a Prayer' (1989)?", "Madonna", ["Cyndi Lauper", "Whitney Houston", "Janet Jackson"]],
+    ["In welke band spelen Mick Jagger en Keith Richards?", "The Rolling Stones", ["The Who", "The Kinks", "The Doors"]],
+    ["Uit welk land komt Måneskin, winnaar van het Songfestival 2021?", "Italië", ["Zweden", "Spanje", "Frankrijk"]],
+    ["Welk Italiaans muziekwoord betekent 'zacht'?", "Piano", ["Forte", "Allegro", "Largo"]],
+    ["Welke Duitse band zingt 'Du hast'?", "Rammstein", ["Scorpions", "Kraftwerk", "Tokio Hotel"]],
+    ["Wie zong 'Rolling in the Deep'?", "Adele", ["Amy Winehouse", "Duffy", "Florence Welch"]],
+  ]},
+];
+
+// ---------- Hulpjes ----------
+const MAX_PLAYERS = 10;
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const qid = (c, i) => c + ":" + i;
+const LETTERS = "ABCD";
+
+// ---------- Toestand ----------
+let S = {
+  screen: "setup",
+  names: ["", ""],
+  perPlayer: 5,
+  mode: "kies",          // "kies" of "draai"
+  players: [],           // {name, score, joker, right}
+  turn: 0,
+  roundUsed: [],         // ids gebruikt in deze ronde
+  seen: [],              // ids gezien in eerdere rondes (om herhaling te beperken)
+  q: null,               // {cat, idx, opts, removed, picked, result}
+  confirmQuit: false,
+  bumped: -1,
+};
+
+function loadNames() {
+  try { const n = JSON.parse(localStorage.getItem("cafequiz-names") || "null"); if (Array.isArray(n) && n.length) S.names = n.slice(0, MAX_PLAYERS); } catch (e) {}
+}
+function saveNames() { try { localStorage.setItem("cafequiz-names", JSON.stringify(S.names)); } catch (e) {} }
+
+const totalTurns = () => S.players.length * S.perPlayer;
+const current = () => S.players[S.turn % S.players.length];
+const remaining = ci => CATS[ci].qs.filter((_, i) => !S.roundUsed.includes(qid(ci, i))).length;
+
+function rotatingCat() {
+  const n = S.players.length;
+  let ci = (S.turn + Math.floor(S.turn / n)) % CATS.length;
+  for (let k = 0; k < CATS.length; k++) { const c = (ci + k) % CATS.length; if (remaining(c) > 0) return c; }
+  return -1;
+}
+
+function pickQuestion(ci) {
+  const cat = CATS[ci];
+  let pool = cat.qs.map((_, i) => i).filter(i => !S.roundUsed.includes(qid(ci, i)));
+  if (!pool.length) return;
+  const fresh = pool.filter(i => !S.seen.includes(qid(ci, i)));
+  if (fresh.length) pool = fresh;
+  const idx = pool[Math.floor(Math.random() * pool.length)];
+  const raw = cat.qs[idx];
+  S.roundUsed.push(qid(ci, idx));
+  S.q = { cat: ci, idx, opts: raw[2] ? shuffle([raw[1], ...raw[2]]) : null, removed: [], picked: null, result: null, shown: false };
+  S.screen = "question";
+  render();
+}
+
+// ---------- Acties ----------
+function startGame(keepScores) {
+  if (!keepScores) {
+    const names = S.names.map(n => n.trim()).filter(Boolean);
+    S.players = names.map(name => ({ name, score: 0, joker: true, right: 0 }));
+  } else {
+    S.players.forEach(p => { p.score = 0; p.joker = true; p.right = 0; });
+  }
+  S.seen = S.seen.concat(S.roundUsed);
+  // als een categorie volledig gezien is, die categorie opnieuw vrijgeven
+  CATS.forEach((c, ci) => { if (c.qs.every((_, i) => S.seen.includes(qid(ci, i)))) S.seen = S.seen.filter(id => !id.startsWith(ci + ":")); });
+  S.roundUsed = []; S.turn = 0; S.q = null; S.confirmQuit = false;
+  S.players = shuffle(S.players);
+  S.screen = "turn";
+  render();
+}
+
+function answer(opt) {
+  const q = S.q, raw = CATS[q.cat].qs[q.idx];
+  if (q.result) return;
+  q.picked = opt;
+  q.result = opt === raw[1] ? "ok" : "no";
+  const p = current();
+  if (q.result === "ok") { p.score += 1; p.right++; S.bumped = S.turn % S.players.length; }
+  render();
+}
+
+function judgeOpen(ok) {
+  const q = S.q;
+  if (q.result) return;
+  q.result = ok ? "ok" : "no";
+  const p = current();
+  if (ok) { p.score += 2; p.right++; S.bumped = S.turn % S.players.length; }
+  render();
+}
+
+function useJoker() {
+  const q = S.q, raw = CATS[q.cat].qs[q.idx], p = current();
+  if (!p.joker || !q.opts || q.result) return;
+  p.joker = false;
+  q.removed = shuffle(raw[2]).slice(0, 2);
+  render();
+}
+
+function nextTurn() {
+  S.turn++; S.q = null; S.bumped = -1;
+  const anyLeft = CATS.some((_, ci) => remaining(ci) > 0);
+  S.screen = S.turn >= totalTurns() || !anyLeft ? "end" : "turn";
+  render();
+}
+
+// ---------- Weergave ----------
+function scoreboard() {
+  const cur = S.turn % S.players.length;
+  return `<div class="scores" aria-label="Scorebord">${S.players.map((p, i) => `
+    <div class="chip ${i === cur && S.screen !== "end" ? "now" : ""} ${i === S.bumped ? "bump" : ""}">
+      <span>${esc(p.name)}</span><b>${p.score}</b>${p.joker ? `<span class="j" title="50/50-joker nog beschikbaar">50/50</span>` : ""}
+    </div>`).join("")}</div>`;
+}
+
+function header() {
+  const pct = Math.min(100, (S.turn / totalTurns()) * 100);
+  const qnum = Math.floor(S.turn / S.players.length) + 1;
+  return `
+    <div class="topbar">
+      <span class="eyebrow">Beurt ${Math.min(S.turn + 1, totalTurns())} / ${totalTurns()} · vraag ${Math.min(qnum, S.perPlayer)} per speler</span>
+      ${S.confirmQuit
+        ? `<span class="confirm"><span class="muted">Stoppen?</span><button class="linkbtn" data-a="quit-yes">Ja, naar uitslag</button><button class="linkbtn" data-a="quit-no">Nee</button></span>`
+        : `<button class="linkbtn" data-a="quit">Stop ronde</button>`}
+    </div>
+    <div class="progress"><i style="width:${pct}%"></i></div>
+    ${scoreboard()}`;
+}
+
+function viewSetup() {
+  const canAdd = S.names.length < MAX_PLAYERS;
+  return `
+    <header class="stack">
+      <span class="eyebrow">Zes categorieën · tot ${MAX_PLAYERS} spelers</span>
+      <h1>Café<span>quiz</span></h1>
+      <p class="muted" style="margin:0">Geef de gsm door. Meerkeuze = 1 punt, open vraag = 2 punten. Iedereen krijgt één 50/50-joker per ronde.</p>
+    </header>
+    <section class="stack" aria-label="Spelers">
+      <h3 class="eyebrow">Spelers (${S.names.length}/${MAX_PLAYERS})</h3>
+      ${S.names.map((n, i) => `
+        <div class="player-row">
+          <span class="num">${i + 1}</span>
+          <input id="p${i}" data-i="${i}" value="${esc(n)}" placeholder="Naam speler ${i + 1}" maxlength="20" autocomplete="off" enterkeyhint="next">
+          ${S.names.length > 1 ? `<button class="x" data-a="del" data-i="${i}" aria-label="Verwijder speler ${i + 1}">×</button>` : ""}
+        </div>`).join("")}
+      <button class="btn block" data-a="add" ${canAdd ? "" : "disabled"}>+ Speler toevoegen</button>
+    </section>
+    <section class="panel">
+      <div class="stack">
+        <span class="eyebrow">Vragen per speler</span>
+        <div class="seg">${[3, 5, 7, 10].map(n => `<button data-a="per" data-v="${n}" aria-pressed="${S.perPlayer === n}">${n}</button>`).join("")}</div>
+      </div>
+      <div class="stack">
+        <span class="eyebrow">Categorie</span>
+        <div class="seg">
+          <button data-a="mode" data-v="kies" aria-pressed="${S.mode === "kies"}">Speler kiest</button>
+          <button data-a="mode" data-v="draai" aria-pressed="${S.mode === "draai"}">Automatisch afwisselen</button>
+        </div>
+      </div>
+    </section>
+    <div class="err" id="err" role="alert"></div>
+    <button class="btn primary block" data-a="start" style="min-height:72px;font-size:1.35rem">Start quiz ▶</button>`;
+}
+
+function viewTurn() {
+  const p = current();
+  const auto = S.mode === "draai" ? rotatingCat() : -1;
+  return `
+    ${header()}
+    <div class="turn">
+      <span class="eyebrow">Aan de beurt</span>
+      <div class="who">${esc(p.name)}</div>
+      <span class="muted">${p.score} ${p.score === 1 ? "punt" : "punten"}${p.joker ? " · 50/50-joker nog beschikbaar" : ""}</span>
+    </div>
+    ${S.mode === "draai" && auto >= 0 ? `
+      <div class="cat" style="min-height:auto;padding:18px">
+        <span class="eyebrow">Categorie</span>
+        <strong style="font-size:1.8rem">${CATS[auto].ico} ${CATS[auto].name}</strong>
+      </div>
+      <button class="btn primary block" data-a="pick" data-c="${auto}" style="min-height:72px">Toon de vraag</button>`
+    : `
+      <span class="eyebrow">Kies een categorie</span>
+      <div class="cats">${CATS.map((c, ci) => { const r = remaining(ci); return `
+        <button class="cat" data-a="pick" data-c="${ci}" ${r ? "" : "disabled"}>
+          <span class="ico" aria-hidden="true">${c.ico}</span>
+          <strong>${c.name}</strong>
+          <small>${r ? r + " vragen over" : "op voor deze ronde"}</small>
+        </button>`; }).join("")}</div>`}`;
+}
+
+function viewQuestion() {
+  const q = S.q, cat = CATS[q.cat], raw = cat.qs[q.idx], p = current();
+  const isOpen = !q.opts;
+  let body = "";
+  if (!isOpen) {
+    body = `<div class="opts">${q.opts.map((o, i) => {
+      let cls = "opt";
+      if (q.removed.includes(o)) cls += " gone";
+      if (q.result) { if (o === raw[1]) cls += " correct"; else if (o === q.picked) cls += " wrong"; }
+      return `<button class="${cls}" data-a="ans" data-o="${i}" ${q.result || q.removed.includes(o) ? "disabled" : ""}><span class="l">${LETTERS[i]}</span><span>${esc(o)}</span></button>`;
+    }).join("")}</div>
+    ${!q.result ? `<button class="btn block" data-a="joker" ${p.joker ? "" : "disabled"}>${p.joker ? "Gebruik 50/50-joker (1× per ronde)" : "Joker al gebruikt"}</button>` : ""}`;
+  } else if (!q.shown) {
+    body = `<p class="muted" style="margin:0">Open vraag. ${esc(p.name)} zegt het antwoord luidop, daarna toon je het juiste antwoord.</p>
+      <button class="btn primary block" data-a="show" style="min-height:72px">Toon antwoord</button>`;
+  } else {
+    body = `<div class="reveal"><span class="eyebrow">Juist antwoord</span><span class="ans">${esc(raw[1])}</span></div>
+      ${!q.result ? `<span class="muted">Had ${esc(p.name)} het goed? De groep beslist.</span>
+      <div class="row"><button class="btn good grow" data-a="open-ok">Goed (+2)</button><button class="btn bad grow" data-a="open-no">Fout</button></div>` : ""}`;
+  }
+  let verdict = "";
+  if (q.result) {
+    verdict = `<div class="verdict ${q.result}">${q.result === "ok" ? `Juist! +${isOpen ? 2 : 1}` : `Helaas${isOpen ? "" : ", het was: " + esc(raw[1])}`}</div>
+      <button class="btn primary block" data-a="next" style="min-height:72px">${S.turn + 1 >= totalTurns() ? "Naar de uitslag 🏆" : "Volgende: " + esc(S.players[(S.turn + 1) % S.players.length].name) + " ▶"}</button>`;
+  }
+  return `
+    ${header()}
+    <article class="qcard">
+      <div class="meta"><span>${cat.ico} ${cat.name}</span><span>${esc(p.name)} · ${isOpen ? "open · 2 ptn" : "meerkeuze · 1 pt"}</span></div>
+      <div class="q">${esc(raw[0])}</div>
+    </article>
+    ${body}
+    ${verdict}`;
+}
+
+function viewEnd() {
+  const ranked = S.players.slice().sort((a, b) => b.score - a.score || b.right - a.right);
+  const top = ranked[0]?.score ?? 0;
+  const winners = ranked.filter(p => p.score === top);
+  let place = 0, prev = null;
+  return `
+    <div class="winner">
+      <span class="eyebrow">${winners.length > 1 ? "Gedeelde winst" : "Winnaar"}</span>
+      <div class="big">${winners.map(w => esc(w.name)).join(" & ")}</div>
+      <span class="muted">${top} ${top === 1 ? "punt" : "punten"}</span>
+    </div>
+    <div class="podium">${ranked.map((p, i) => {
+      if (p.score !== prev) { place = i + 1; prev = p.score; }
+      return `<div class="rank ${p.score === top ? "first" : ""}"><span class="p">${place}.</span><span class="n">${esc(p.name)} <span class="muted" style="font-weight:400;font-size:.9rem;${p.score === top ? "color:inherit;opacity:.7" : ""}">· ${p.right} juist</span></span><span class="s">${p.score}</span></div>`;
+    }).join("")}</div>
+    <button class="btn primary block" data-a="again" style="min-height:72px">Nieuwe ronde, zelfde spelers</button>
+    <button class="btn block" data-a="setup">Spelers aanpassen</button>`;
+}
+
+function render() {
+  const app = $("#app");
+  app.innerHTML = { setup: viewSetup, turn: viewTurn, question: viewQuestion, end: viewEnd }[S.screen]();
+  window.scrollTo({ top: 0 });
+}
+
+// ---------- Events ----------
+document.addEventListener("input", e => {
+  if (e.target.matches(".player-row input")) { S.names[+e.target.dataset.i] = e.target.value; saveNames(); }
+});
+document.addEventListener("keydown", e => {
+  if (e.key === "Enter" && e.target.matches(".player-row input")) {
+    const i = +e.target.dataset.i, nxt = $("#p" + (i + 1));
+    if (nxt) nxt.focus();
+    else if (S.names.length < MAX_PLAYERS && e.target.value.trim()) { S.names.push(""); render(); $("#p" + (i + 1))?.focus(); }
+  }
+});
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-a]"); if (!b || b.disabled) return;
+  const a = b.dataset.a;
+  if (a === "add") { if (S.names.length < MAX_PLAYERS) { S.names.push(""); saveNames(); render(); $("#p" + (S.names.length - 1))?.focus(); } }
+  else if (a === "del") { S.names.splice(+b.dataset.i, 1); saveNames(); render(); }
+  else if (a === "per") { S.perPlayer = +b.dataset.v; render(); }
+  else if (a === "mode") { S.mode = b.dataset.v; render(); }
+  else if (a === "start") {
+    const names = S.names.map(n => n.trim()).filter(Boolean);
+    const dup = names.find((n, i) => names.findIndex(m => m.toLowerCase() === n.toLowerCase()) !== i);
+    if (!names.length) { $("#err").textContent = "Vul minstens één naam in."; return; }
+    if (dup) { $("#err").textContent = `"${dup}" staat er twee keer in. Maak de namen uniek.`; return; }
+    S.names = names; saveNames(); startGame(false);
+  }
+  else if (a === "pick") pickQuestion(+b.dataset.c);
+  else if (a === "ans") answer(S.q.opts[+b.dataset.o]);
+  else if (a === "joker") useJoker();
+  else if (a === "show") { S.q.shown = true; render(); }
+  else if (a === "open-ok") judgeOpen(true);
+  else if (a === "open-no") judgeOpen(false);
+  else if (a === "next") nextTurn();
+  else if (a === "quit") { S.confirmQuit = true; render(); }
+  else if (a === "quit-no") { S.confirmQuit = false; render(); }
+  else if (a === "quit-yes") { S.confirmQuit = false; S.screen = "end"; render(); }
+  else if (a === "again") startGame(true);
+  else if (a === "setup") { S.names = S.players.map(p => p.name); S.screen = "setup"; render(); }
+});
+
+// ---------- Start (behoudt spelstand bij een update van de pagina) ----------
+function start(data) {
+  if (data && data.state) S = Object.assign(S, data.state); else loadNames();
+  render();
+}
+window.claude?.hot?.snapshot?.(() => ({ state: S }));
+window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+</script>
